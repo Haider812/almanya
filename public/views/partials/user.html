@@ -1,0 +1,113 @@
+<md-dialog flex="100" flex-gt-xs="40" aria-label="User dialog">
+
+  <form name="form" role="form" novalidate>
+
+    <md-toolbar>
+      <div class="md-toolbar-tools">
+        <h2>{{ objUser.id ? 'Edit' : 'New' }} Benutzer</h2>
+        <span flex></span>
+        <ng-md-icon aria-label="Close dialog" icon="close" class="icon-close"
+        ng-click="cancel()">
+        </ng-md-icon>
+      </div>
+    </md-toolbar>
+
+    <md-dialog-content>
+      <md-content layout="column" layout-padding>
+
+        <md-input-container>
+          <label>Name</label>
+          <input type="text" name="name" ng-model="objUser.name" required>
+          <div ng-messages="form.name.$error" ng-show="form.$submitted">
+            <div ng-message="required">Name erforderlich</div>
+          </div>
+        </md-input-container>
+
+        <md-input-container>
+          <label>Email</label>
+          <input type="email" name="email" ng-model="objUser.email" required>
+          <div ng-messages="form.email.$error" ng-show="form.$submitted">
+            <div ng-message="required">Email erforderlich</div>
+            <div ng-message="email">Ungültige E-Mail</div>
+          </div>
+        </md-input-container>
+		
+		 <md-input-container>
+          <label>Straße</label>
+          <input type="text" name="strasse" ng-model="objUser.strasse" required>
+          <div ng-messages="form.strasse.$error" ng-show="form.$submitted">
+            <div ng-message="required">Straße erforderlich</div>
+          </div>
+        </md-input-container>
+		
+		 <md-input-container>
+          <label>Plz</label>
+          <input type="text" name="plz" ng-model="objUser.plz" required>
+          <div ng-messages="form.plz.$error" ng-show="form.$submitted">
+            <div ng-message="required">Plz erforderlich</div>
+          </div>
+        </md-input-container>
+
+        <md-input-container>
+          <label>Passwort</label>
+          <input type="password" name="Password" ng-model="objUser.password">
+        </md-input-container>
+
+        <md-input-container class="md-block" ng-if="!objUser.id">
+          <label>Rolle</label>
+          <md-select name="role" required ng-model="objUser.roleName">
+            <md-option value="Admin">
+              Admin
+            </md-option>
+            <md-option value="User">
+              Benutzer
+            </md-option>
+          </md-select>
+          <div ng-messages="form.role.$error" ng-show="form.$submitted">
+            <div ng-message="required">Rolle erforderlich</div>
+          </div>
+        </md-input-container>
+
+        <div layout="row" layout-align="start center">
+          <md-input-container md-no-float>
+            <label>Foto hochladen</label>
+            <input type="text" ng-model="imageFilename" required>
+          </md-input-container>
+
+          <ng-md-icon icon="photo_camera" class="photo-camera"
+            ng-class="{ 'photo-active': objUser.photo.url() }"
+            ngf-select="uploadImage($file)" ngf-max-size="2MB"
+            ngf-pattern="'image/*'" accept="image/*">
+            <md-tooltip>
+             Bild hinzufügen
+            </md-tooltip>
+          </ng-md-icon>
+          <md-progress-circular class="md-primary" md-diameter="30"
+            ng-if="isUploading">
+          </md-progress-circular>
+        </div>
+				
+		
+      </md-content>
+    </md-dialog-content>
+
+    <md-dialog-actions layout="row">
+      <span flex></span>
+      <md-button class="md-raised" md-primary md-raised ng-click="cancel()">
+        Zurück
+      </md-button>
+      <md-button type="submit" class="md-raised md-primary"
+        ng-disabled="isSavingUser"
+        ng-click="onEventSaveUser(form.$valid)"
+        ng-show="!objUser.id">
+        {{ !isSavingUser ? 'Speichern' : 'Speichern...' }}
+      </md-button>
+      <md-button type="submit" class="md-raised md-primary"
+        ng-disabled="isSavingUser"
+        ng-click="onEventUpdateUser(form.$valid)"
+        ng-show="objUser.id">
+        {{ !isSavingUser ? 'Aktualisieren' : 'Aktualisieren...' }}
+      </md-button>
+    </md-dialog-actions>
+  </form>
+</md-dialog>

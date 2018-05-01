@@ -1,0 +1,175 @@
+<md-content ng-controller="ImmobilieCtrl">
+
+<md-title>	
+		<h2> IMMOBILIEN </h2>
+		</md-title>
+		<br>
+
+	<md-table-toolbar>
+		<div layout="row">
+			<md-content flex-gt-md="65" flex="100" style="overflow: hidden">
+				<br>
+				<div layout-gt-sm="row" class="filter-bar">
+					<md-input-container class="md-block" flex-gt-xs>
+						<label>Suche nach Titel</label>
+						<input type="text" ng-model="query.filter"
+							ng-model-options="{ debounce: 1000 }" ng-change="onQueryChange()">
+					</md-input-container>
+					<md-input-container class="md-block">
+						<label>Kategorien</label>
+						<md-select name="icategory" required ng-model="query.icategory"
+							ng-change="onQueryChange()">
+							<md-option ng-value="">
+							Alle
+							</md-option>
+						<md-option ng-value="icategory" value="{{ icategory }}"
+							ng-repeat="icategory in icategories track by icategory.id">
+							{{ icategory.title }}
+						</md-option>
+						</md-select>
+					</md-input-container>	
+					<md-input-container class="md-block" flex-gt-xs>
+						<label>Status</label>
+						<md-select ng-model="query.status" ng-change="onQueryChange()">
+							<md-option value="">
+								Alle
+							</md-option>
+							<md-option value="pending">
+								Ausstehend
+							</md-option>
+							<md-option value="approved">
+								Genehmigt
+							</md-option>
+							<md-option value="rejected">
+								Abgelehnt
+							</md-option>
+							<md-option value="expired">
+								Abgelaufen
+							</md-option>
+							<md-option value="expireInTenDays">
+								Läuft in 10 Tagen ab
+							</md-option>
+							<md-option value="expireInThirtyDays">
+								Läuft in 30 Tagen ab
+							</md-option>
+						</md-select>
+					</md-input-container>
+					<md-datepicker ng-model="query.date" ng-change="onQueryChange()"
+						md-placeholder="Enter date" flex-gt-xs>
+					</md-datepicker>
+					
+					<form action="/dashboard/ikategorien">
+					<button class="md-primary md-raised md-button">Kategorien Verwalten</button>
+					</form>
+					
+				</div>
+			</md-content>
+		</div>
+	</md-table-toolbar>
+
+	<md-table-container>
+	  <table md-table md-progress="promise">
+	    <thead md-head>
+	      <tr md-row>
+	      	<th md-column></th>
+	        <th md-column>Bezeichnung</th>
+			<th md-column>Kategorie</th>
+	        <th md-column>Status</th>
+			<th md-column>Miete</th>
+			<th md-column>Wohnfläche</th>
+			<th md-column>Ablauf</th>
+			<th md-column>Eintrag</th>
+			<th name="Actions">
+	      </tr>
+	    </thead>
+	    <tbody md-body>
+	      <tr md-row ng-repeat="immobilie in immobilien">
+	      	<td md-cell>
+	      		<img class="img-thumb img-circle" ng-src="/images/placeholder.png"
+						actual-src="{{ immobilie.imageThumb.url() }}" />
+	      	</td>
+	      	<td md-cell>{{:: immobilie.title }}</td>
+	        <td md-cell>{{:: immobilie.icategory.get('title') }}</td>
+			<td md-cell>
+				<span class="label"
+				  ng-class="{ 'green': immobilie.getStatus() === 'Genehmigt',
+					'red': immobilie.getStatus() === 'Abgelehnt',
+					'orange': immobilie.getStatus() === 'Abgelaufen',
+				  'yellow': immobilie.getStatus() === 'Ausstehend' }">
+				  {{ immobilie.getStatus() }}
+				</span>
+			</td>
+			<td md-cell>{{:: immobilie.miete }}</td>
+			<td md-cell>{{:: immobilie.wohnflaeche }}</td>					
+			<td md-cell>
+				<span ng-if="isDate(immobilie.expiresAt)">
+					{{ immobilie.expiresAt | date:'mediumDate' }}
+				</span>
+			</td>
+			<td md-cell>{{ immobilie.createdAt | date:'mediumDate' }}</td>
+	        <td md-cell>
+				<md-menu>
+			      <md-button aria-label="Open menu" class="md-icon-button"
+			        ng-click="openMenu($mdOpenMenu, $event)">
+			        <ng-md-icon md-menu-origin icon="more_vert"
+			          layout="row" layout-align="start center">
+			        </ng-md-icon>
+			      </md-button>
+			      <md-menu-content width="3">
+
+			        <md-menu-item>
+			          <md-button aria-label="Edit immobilie"
+								  ng-click="onUpdateImmobilie($event, immobilie)">
+			            Bearbeiten
+			          </md-button>
+			        </md-menu-item>
+
+			        <md-menu-item aria-label="Delete immobilie">
+			          <md-button aria-label="Delete immobilie"
+								  ng-click="onDestroyImmobilie($event, immobilie)">
+			            Löschen
+			          </md-button>
+			        </md-menu-item>
+
+							<md-divider></md-divider>
+
+							<md-menu-item>
+			          <md-button aria-label="Approve immobilie"
+								  ng-click="onUpdateIsApproved(immobilie, true)">
+			            Genehmigen
+			          </md-button>
+			        </md-menu-item>
+
+							<md-menu-item>
+								<md-button aria-label="Approve immobilie for # days"
+								  ng-click="onUpdateExpiresAt($event, immobilie)">
+									Genehmigen # Tage
+								</md-button>
+							</md-menu-item>
+
+					<md-menu-item>
+						<md-button aria-label="Reject immobilie"
+							ng-click="onUpdateIsApproved(immobilie, false)">
+							Ablehnen
+						</md-button>
+			        </md-menu-item>
+
+			      </md-menu-content>
+			    </md-menu>
+	        </td>
+	      </tr>
+	    </tbody>
+	  </table>
+	</md-table-container>
+	<md-table-pagination md-options="rowOptions" md-limit="query.limit"
+	  md-page="query.page" md-total="{{query.total}}"
+		md-on-paginate="onPaginationChange">
+	</md-table-pagination>
+
+  <md-button class="md-fab md-primary md-fab-bottom-right"
+    aria-label="Neues Immobilie" ng-click="onCreateImmobilie($event)">
+    <ng-md-icon class="icon-add" icon="add"
+      layout="column" layout-align="center center">
+    </ng-md-icon>
+  </md-button>
+</md-content>

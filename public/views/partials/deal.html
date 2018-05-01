@@ -1,0 +1,86 @@
+<md-dialog flex="100" flex-gt-xs="40" aria-label="Deal Dialog">
+  <form name="form" role="form" novalidate>
+    <md-toolbar>
+      <div class="md-toolbar-tools">
+        <h2 ng-show="isCreating">Neuer Eintrag</h2>
+        <h2 ng-show="!isCreating">Bearbeite {{::deal.title }}</h2>
+        <span flex></span>
+        <ng-md-icon icon="close" class="icon-close" ng-click="cancel()"
+          aria-label="Close dialog"></ng-md-icon>
+      </div>
+    </md-toolbar>
+    <md-dialog-content>
+      <md-content layout="column" layout-padding>
+        <md-input-container class="md-block">
+          <label>Kategorie</label>
+          <md-select name="category" required ng-model="deal.category"
+            ng-model-options="{ trackBy: '$value.id' }">
+            <md-option ng-value="category"
+              ng-repeat="category in categories track by category.id">
+              {{ category.title }}
+            </md-option>
+          </md-select>
+          <div ng-messages="form.category.$error" ng-show="form.$submitted">
+            <div ng-message="required">Kategorie erforderlich</div>
+          </div>
+        </md-input-container>
+
+        <md-input-container class="md-block">
+          <label>Titel</label>
+          <input type="text" required name="title" ng-model="deal.title">
+          <div ng-messages="form.title.$error" ng-show="form.$submitted">
+            <div ng-message="required">Titel erforderlich</div>
+          </div>
+        </md-input-container>
+
+        <md-input-container class="md-block">
+          <label>Beschreibung</label>
+          <textarea name="description"
+            ng-maxlength="600" ng-model="deal.description"
+            columns="2" md-maxlength="600">
+          </textarea>
+          <div ng-messages="form.description.$error" ng-show="form.$submitted">
+            <div ng-message="required">Beschreibung erforderlich</div>
+            <div ng-message="maxlength">Beschreibung zu groß</div>
+          </div>
+        </md-input-container>
+
+        <md-input-container class="md-block">
+          <label>Telefon</label>
+          <input type="text" name="phone" ng-model="deal.phone">
+        </md-input-container>
+
+        <md-input-container class="md-block">
+          <label>Webseite</label>
+          <input type="text" name="website" ng-model="deal.website">
+        </md-input-container>
+
+        <md-input-container class="md-block">
+          <label>Adresse</label>
+          <input type="text" name="address" ng-model="deal.address"
+            ng-model-options="{ debounce: 2000 }" ng-change="onAddressChanged()">
+        </md-input-container>
+
+
+
+        
+      </md-content>
+    </md-dialog-content>
+    <md-dialog-actions layout="row">
+      <span flex></span>
+      <md-button class="md-raised" md-raised md-primary ng-click="cancel()">
+       Zurück
+      </md-button>
+      <md-button type="submit" class="md-raised md-primary" ng-click="onSaveDeal(form.$valid)"
+        ng-disabled="isSavingDeal"
+        ng-show="isCreating">
+        {{ !isSavingPlace ? 'Speichern' : 'Speichern...' }}
+      </md-button>
+      <md-button type="submit" class="md-raised md-primary" ng-click="onUpdateDeal(form.$valid)"
+        ng-disabled="isSavingDeal"
+        ng-show="!isCreating">
+        {{ !isSavingPlace ? 'Aktualisieren' : 'Aktualisieren...' }}
+      </md-button>
+    </md-dialog-actions>
+  </form>
+</md-dialog>

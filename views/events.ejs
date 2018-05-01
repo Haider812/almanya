@@ -1,0 +1,156 @@
+<md-content ng-controller="EventCtrl">
+
+	<md-title>
+		<h2> VERANSTALTUNGEN</h2>
+	</md-title>
+	<br>
+
+	<md-table-toolbar>
+		<div layout="row">
+			<md-content flex-gt-md="65" flex="100" style="overflow: hidden">
+				<br>
+				<div layout-gt-sm="row" class="filter-bar">
+					<md-input-container class="md-block" flex-gt-xs>
+						<label>Suche nach Titel</label>
+						<input type="text" ng-model="query.filter" ng-model-options="{ debounce: 1000 }" ng-change="onQueryChange()">
+					</md-input-container>
+					<md-input-container class="md-block">
+						<label>Kategorien</label>
+						<md-select name="ecategory" required ng-model="query.ecategory" ng-change="onQueryChange()">
+							<md-option value="" ng-value="">
+								Alle
+							</md-option>
+							<md-option ng-value="ecategory" value="{{ ecategory }}" ng-repeat="ecategory in ecategories track by ecategory.id">
+								{{ ecategory.title }}
+							</md-option>
+						</md-select>
+					</md-input-container>
+					<md-input-container class="md-block" flex-gt-xs>
+						<label>Status</label>
+						<md-select ng-model="query.status" ng-change="onQueryChange()">
+							<md-option value="">
+								Alle
+							</md-option>
+							<md-option value="pending">
+								Ausstehend
+							</md-option>
+							<md-option value="approved">
+								Genehmigt
+							</md-option>
+							<md-option value="rejected">
+								Abgelehnt
+							</md-option>
+							<md-option value="expired">
+								Abgelaufen
+							</md-option>
+							<md-option value="expireInTenDays">
+								Läuft in 10 Tagen ab
+							</md-option>
+							<md-option value="expireInThirtyDays">
+								Läuft in 30 Tagen ab
+							</md-option>
+						</md-select>
+					</md-input-container>
+					<md-datepicker ng-model="query.date" ng-change="onQueryChange()" md-placeholder="Enter date" flex-gt-xs>
+					</md-datepicker>
+
+					<form action="/dashboard/ekategorien">
+						<button class="md-primary md-raised md-button">Kategorien Verwalten</button>
+					</form>
+
+				</div>
+			</md-content>
+		</div>
+	</md-table-toolbar>
+
+	<md-table-container>
+		<table md-table md-progress="promise">
+			<thead md-head>
+				<tr md-row>
+					<th md-column></th>
+					<th md-column>Bezeichnung</th>
+					<th md-column>Kategorie</th>
+					<th md-column>Status</th>
+					<th md-column>Datum</th>
+					<th md-column>Ablauf</th>
+					<th md-column>Eintrag</th>
+					<th name="Actions">
+				</tr>
+			</thead>
+			<tbody md-body>
+				<tr md-row ng-repeat="evente in events">
+					<td md-cell>
+						<img class="img-thumb img-circle" ng-src="/images/placeholder.png" actual-src="{{ evente.imageThumb.url() }}" />
+					</td>
+					<td md-cell>{{:: evente.title }}</td>
+					<td md-cell>{{:: evente.ecategory.get('title') }}</td>
+					<td md-cell>
+						<span class="label" ng-class="{ 'green': evente.getStatus() === 'Genehmigt',
+					'red': evente.getStatus() === 'Abgelehnt',
+					'orange': evente.getStatus() === 'Abgelaufen',
+				  'yellow': evente.getStatus() === 'Ausstehend' }">
+							{{ evente.getStatus() }}
+						</span>
+					</td>
+					<td md-cell>{{:: evente.datum }}</td>
+					<td md-cell>
+						<span ng-if="isDate(evente.expiresAt)">
+							{{ evente.expiresAt | date:'mediumDate' }}
+						</span>
+					</td>
+					<td md-cell>{{ evente.createdAt | date:'mediumDate' }}</td>
+					<td md-cell>
+						<md-menu>
+							<md-button aria-label="Open menu" class="md-icon-button" ng-click="openMenu($mdOpenMenu, $evente)">
+								<ng-md-icon md-menu-origin icon="more_vert" layout="row" layout-align="start center">
+								</ng-md-icon>
+							</md-button>
+							<md-menu-content width="3">
+
+								<md-menu-item>
+									<md-button aria-label="Edit evente" ng-click="onUpdateEvent($evente, evente)">
+										Bearbeiten
+									</md-button>
+								</md-menu-item>
+
+								<md-menu-item aria-label="Delete evente">
+									<md-button aria-label="Delete evente" ng-click="onDestroyEvent($evente, evente)">
+										Löschen
+									</md-button>
+								</md-menu-item>
+
+								<md-divider></md-divider>
+
+								<md-menu-item>
+									<md-button aria-label="Approve evente" ng-click="onUpdateIsApproved(evente, true)">
+										Genehmigen
+									</md-button>
+								</md-menu-item>
+
+								<md-menu-item>
+									<md-button aria-label="Approve evente for # days" ng-click="onUpdateExpiresAt($evente, evente)">
+										Genehmigen # Tage
+									</md-button>
+								</md-menu-item>
+
+								<md-menu-item>
+									<md-button aria-label="Reject evente" ng-click="onUpdateIsApproved(evente, false)">
+										Ablehnen
+									</md-button>
+								</md-menu-item>
+
+							</md-menu-content>
+						</md-menu>
+					</td>
+				</tr>
+			</tbody>
+		</table>
+	</md-table-container>
+	<md-table-pagination md-options="rowOptions" md-limit="query.limit" md-page="query.page" md-total="{{query.total}}" md-on-paginate="onPaginationChange">
+	</md-table-pagination>
+
+	<md-button class="md-fab md-primary md-fab-bottom-right" aria-label="Neues Event" ng-click="onCreateEvent($evente)">
+		<ng-md-icon class="icon-add" icon="add" layout="column" layout-align="center center">
+		</ng-md-icon>
+	</md-button>
+</md-content>

@@ -1,0 +1,41 @@
+<md-dialog aria-label="Modal" ng-cloak>
+  <form name="form" novalidate>
+    <md-toolbar>
+      <div class="md-toolbar-tools">
+	  <h2># Tage genehmigen</h2>
+        <span flex></span>
+        <ng-md-icon icon="close" class="icon-close" ng-click="hide()"
+          aria-label="Close dialog">
+        </ng-md-icon>
+      </div>
+    </md-toolbar>
+    <md-dialog-content>
+      <div class="md-dialog-content">
+        <h4>Geben Sie die Anzahl der Tage ein.</h4>
+        <p>
+
+        </p>
+
+		<md-input-container class="md-block">
+          <label># Tage</label>
+		  <input reguired type="number" name="days" ng-model="formData.days">
+          <div ng-messages="form.days.$error" ng-show="form.$submitted">
+            <div ng-message="required">Dieses Feld wird benötigt</div>
+          </div>
+        </md-input-container>		
+		
+      </div>
+    </md-dialog-content>
+    <md-dialog-actions layout="row">
+      <span flex></span>
+      <md-button class="md-raised" ng-click="hide()">
+       Zurück
+      </md-button>
+      <md-button type="submit" class="md-raised md-primary"
+        ng-disabled=" isSavingExpiresAt || isDayInvalid()"
+        ng-click="onUpdateExpiresAt(form.$valid)">
+        Aktualisieren
+     </md-button>
+    </md-dialog-actions>
+  </form>
+</md-dialog>

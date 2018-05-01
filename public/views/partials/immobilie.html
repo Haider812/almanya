@@ -1,0 +1,372 @@
+<md-dialog flex="100" flex-gt-xs="40" aria-label="Immobilie Dialog">
+  <form name="form" role="form" novalidate>
+    <md-toolbar>
+      <div class="md-toolbar-tools">
+        <h2 ng-show="isCreating">Neuer Eintrag</h2>
+        <h2 ng-show="!isCreating">Bearbeite {{::immobilie.title }}</h2>
+        <span flex></span>
+        <ng-md-icon icon="close" class="icon-close" ng-click="cancel()" aria-label="Close dialog"></ng-md-icon>
+      </div>
+    </md-toolbar>
+    <md-dialog-content>
+      <md-content layout="column" layout-padding>
+        <md-input-container class="md-block">
+          <label>Kategorie</label>
+          <md-select name="icategory" required ng-model="immobilie.icategory" ng-model-options="{ trackBy: '$value.id' }">
+            <md-option ng-value="icategory" ng-repeat="icategory in icategories track by icategory.id">
+              {{ icategory.title }}
+            </md-option>
+          </md-select>
+          <div ng-messages="form.icategory.$error" ng-show="form.$submitted">
+            <div ng-message="required">Kategorie erforderlich</div>
+          </div>
+        </md-input-container>
+
+        <md-input-container class="md-block">
+          <label>Titel</label>
+          <input type="text" required name="title" ng-model="immobilie.title">
+          <div ng-messages="form.title.$error" ng-show="form.$submitted">
+            <div ng-message="required">Titel erforderlich</div>
+          </div>
+        </md-input-container>
+
+        <md-input-container class="md-block">
+          <label>Beschreibung</label>
+          <textarea name="description" ng-maxlength="600" ng-model="immobilie.description" columns="2" md-maxlength="600">
+          </textarea>
+          <div ng-messages="form.description.$error" ng-show="form.$submitted">
+            <div ng-message="required">Beschreibung erforderlich</div>
+            <div ng-message="maxlength">Beschreibung zu groß</div>
+          </div>
+        </md-input-container>
+
+        <md-input-container class="md-block">
+          <label>Telefon</label>
+          <input type="text" name="phone" ng-model="immobilie.phone">
+        </md-input-container>
+
+        <md-input-container class="md-block">
+          <label>Webseite</label>
+          <input type="text" name="website" ng-model="immobilie.website">
+        </md-input-container>
+
+        <md-input-container class="md-block">
+          <label>Kaufpreis</label>
+          <input type="number" name="kaufpreis" ng-model="immobilie.kaufpreis">
+        </md-input-container>
+
+        <md-input-container class="md-block">
+          <label>Miete</label>
+          <input type="number" name="miete" ng-model="immobilie.miete">
+        </md-input-container>
+
+        <md-input-container class="md-block">
+          <label>Nebenkosten</label>
+          <input type="number" name="nebenkosten" ng-model="immobilie.nebenkosten">
+        </md-input-container>
+
+        <md-input-container class="md-block">
+          <label>Wohnfläche</label>
+          <input type="number" name="wohnflaeche" ng-model="immobilie.wohnflaeche">
+        </md-input-container>
+		
+		<md-input-container class="md-block">
+          <label>Zimmer</label>
+          <input type="number" name="zimmer" ng-model="immobilie.zimmer">
+        </md-input-container>
+
+        <md-input-container class="md-block">
+          <label>Grundstücksfläche</label>
+          <input type="number" name="grundstuecksflaeche" ng-model="immobilie.grundstuecksflaeche">
+        </md-input-container>
+
+        <md-input-container class="md-block">
+          <label>Bezugsfrei ab</label>
+          <input type="text" name="bezugsfrei" ng-model="immobilie.bezugsfrei">
+        </md-input-container>
+
+        <md-input-container class="md-block">
+          <label>Balkon/Garten</label>
+          <input type="text" name="balkonGarten" ng-model="immobilie.balkonGarten">
+        </md-input-container>
+
+        <md-input-container class="md-block">
+          <label>Adresse</label>
+          <input type="text" name="address" ng-model="immobilie.address" ng-model-options="{ debounce: 2000 }" ng-change="onAddressChanged()">
+        </md-input-container>
+
+        <md-input-container>
+          <ng-map class="map" scrollwheel="false" map-type-control="false" street-view-control="false">
+            <marker draggable="true" on-dragend="onMarkerDragEnd()"></marker>
+          </ng-map>
+        </md-input-container>
+
+        <div layout="row" layout-align="start center">
+          <md-input-container>
+            <label>Breitengrad</label>
+            <input type="number" name="latitude" ng-change="onInputLoicationChanged()" ng-model-options="{debounce:1000}" ng-model="input.latitude">
+          </md-input-container>
+
+          <md-input-container>
+            <label>Längengrad</label>
+            <input type="number" name="longitude" ng-change="onInputLoicationChanged()" ng-model-options="{debounce:1000}" ng-model="input.longitude">
+          </md-input-container>
+        </div>
+
+        <div layout="row" layout-align="start center">
+          <md-input-container md-no-float>
+            <label>Bild 1 hochladen</label>
+            <input type="text" ng-model="imageOneFilename" disabled>
+          </md-input-container>
+          <ng-md-icon icon="photo_camera" class="photo-camera" ng-class="{ 'photo-active': immobilie.image.url() }" ngf-select="uploadImageOne($file, $invalidFile)"
+            ngf-max-size="2MB" ngf-pattern="'image/*'" accept="image/*">
+            <md-tooltip>
+              Bild hinzufügen
+            </md-tooltip>
+          </ng-md-icon>
+          <md-progress-circular class="md-primary" md-diameter="30" ng-if="isImageOneUploading">
+          </md-progress-circular>
+        </div>
+        <div layout="row" layout-align="start center">
+          <md-input-container md-no-float>
+            <label>Bild 2 hochladen</label>
+            <input type="text" ng-model="imageTwoFilename" disabled>
+          </md-input-container>
+          <ng-md-icon icon="photo_camera" class="photo-camera" ng-class="{ 'photo-active': immobilie.imageTwo.url() }" ngf-select="uploadImageTwo($file, $invalidFile)"
+            ngf-max-size="2MB" ngf-pattern="'image/*'" accept="image/*">
+            <md-tooltip>
+              Bild hinzufügen
+            </md-tooltip>
+          </ng-md-icon>
+          <md-progress-circular class="md-primary" md-diameter="30" ng-if="isImageTwoUploading">
+          </md-progress-circular>
+        </div>
+
+        <div layout="row" layout-align="start center">
+          <md-input-container md-no-float>
+            <label>Bild 3 hochladen</label>
+            <input type="text" ng-model="imageThreeFilename" disabled>
+          </md-input-container>
+          <ng-md-icon icon="photo_camera" class="photo-camera" ng-class="{ 'photo-active': immobilie.imageThree.url() }" ngf-select="uploadImageThree($file, $invalidFile)"
+            ngf-max-size="2MB" ngf-pattern="'image/*'" accept="image/*">
+            <md-tooltip>
+              Bild hinzufügen
+            </md-tooltip>
+          </ng-md-icon>
+          <md-progress-circular class="md-primary" md-diameter="30" ng-if="isImageThreeUploading">
+          </md-progress-circular>
+        </div>
+
+        <div layout="row" layout-align="start center">
+          <md-input-container md-no-float>
+            <label>Bild 4 hochladen</label>
+            <input type="text" ng-model="imageFourFilename" disabled>
+          </md-input-container>
+          <ng-md-icon icon="photo_camera" class="photo-camera" ng-class="{ 'photo-active': immobilie.imageFour.url() }" ngf-select="uploadImageFour($file, $invalidFile)"
+            ngf-max-size="2MB" ngf-pattern="'image/*'" accept="image/*">
+            <md-tooltip>
+              Bild hinzufügen
+            </md-tooltip>
+          </ng-md-icon>
+          <md-progress-circular class="md-primary" md-diameter="30" ng-if="isImageFourUploading">
+          </md-progress-circular>
+        </div>
+
+        <div layout="row" layout-align="start center">
+          <md-input-container md-no-float>
+            <label>Bild 5 hochladen</label>
+            <input type="text" ng-model="imageFiveFilename" disabled>
+          </md-input-container>
+          <ng-md-icon icon="photo_camera" class="photo-camera" ng-class="{ 'photo-active': immobilie.imageFive.url() }" ngf-select="uploadImageFive($file, $invalidFile)"
+            ngf-max-size="2MB" ngf-pattern="'image/*'" accept="image/*">
+            <md-tooltip>
+              Bild hinzufügen
+            </md-tooltip>
+          </ng-md-icon>
+          <md-progress-circular class="md-primary" md-diameter="30" ng-if="isImageFiveUploading">
+          </md-progress-circular>
+        </div>
+
+        <div layout="row" layout-align="start center">
+          <md-input-container md-no-float>
+            <label>Bild hochladen</label>
+            <input type="text" ng-model="imageSixFilename" disabled>
+          </md-input-container>
+          <ng-md-icon icon="photo_camera" class="photo-camera" ng-class="{ 'photo-active': immobilie.imageSix.url() }" ngf-select="uploadImageSix($file, $invalidFile)"
+            ngf-max-size="2MB" ngf-pattern="'image/*'" accept="image/*">
+            <md-tooltip>
+              Bild hinzufügen
+            </md-tooltip>
+          </ng-md-icon>
+          <md-progress-circular class="md-primary" md-diameter="30" ng-if="isImageSixUploading">
+          </md-progress-circular>
+        </div>
+
+        <div layout="row" layout-align="start center">
+          <md-input-container md-no-float>
+            <label>Bild 7 hochladen</label>
+            <input type="text" ng-model="imageSevenFilename" disabled>
+          </md-input-container>
+          <ng-md-icon icon="photo_camera" class="photo-camera" ng-class="{ 'photo-active': immobilie.imageSeven.url() }" ngf-select="uploadImageSeven($file, $invalidFile)"
+            ngf-max-size="2MB" ngf-pattern="'image/*'" accept="image/*">
+            <md-tooltip>
+              Bild hinzufügen
+            </md-tooltip>
+          </ng-md-icon>
+          <md-progress-circular class="md-primary" md-diameter="30" ng-if="isImageSevenUploading">
+          </md-progress-circular>
+        </div>
+
+        <div layout="row" layout-align="start center">
+          <md-input-container md-no-float>
+            <label>Bild 8 hochladen</label>
+            <input type="text" ng-model="imageEightFilename" disabled>
+          </md-input-container>
+          <ng-md-icon icon="photo_camera" class="photo-camera" ng-class="{ 'photo-active': immobilie.imageEight.url() }" ngf-select="uploadImageEight($file, $invalidFile)"
+            ngf-max-size="2MB" ngf-pattern="'image/*'" accept="image/*">
+            <md-tooltip>
+              Bild hinzufügen
+            </md-tooltip>
+          </ng-md-icon>
+          <md-progress-circular class="md-primary" md-diameter="30" ng-if="isImageEightUploading">
+          </md-progress-circular>
+        </div>
+
+        <div layout="row" layout-align="start center">
+          <md-input-container md-no-float>
+            <label>Bild 9 hochladen</label>
+            <input type="text" ng-model="imageNineFilename" disabled>
+          </md-input-container>
+          <ng-md-icon icon="photo_camera" class="photo-camera" ng-class="{ 'photo-active': immobilie.imageNine.url() }" ngf-select="uploadImageNine($file, $invalidFile)"
+            ngf-max-size="2MB" ngf-pattern="'image/*'" accept="image/*">
+            <md-tooltip>
+              Bild hinzufügen
+            </md-tooltip>
+          </ng-md-icon>
+          <md-progress-circular class="md-primary" md-diameter="30" ng-if="isImageNineUploading">
+          </md-progress-circular>
+        </div>
+
+        <div layout="row" layout-align="start center">
+          <md-input-container md-no-float>
+            <label>Bild 10 hochladen</label>
+            <input type="text" ng-model="imageTenFilename" disabled>
+          </md-input-container>
+          <ng-md-icon icon="photo_camera" class="photo-camera" ng-class="{ 'photo-active': immobilie.imageTen.url() }" ngf-select="uploadImageTen($file, $invalidFile)"
+            ngf-max-size="2MB" ngf-pattern="'image/*'" accept="image/*">
+            <md-tooltip>
+              Bild hinzufügen
+            </md-tooltip>
+          </ng-md-icon>
+          <md-progress-circular class="md-primary" md-diameter="30" ng-if="isImageTenUploading">
+          </md-progress-circular>
+        </div>
+
+        <div layout="row" layout-align="start center">
+          <md-input-container md-no-float>
+            <label>Bild 11 hochladen</label>
+            <input type="text" ng-model="imageElevenFilename" disabled>
+          </md-input-container>
+          <ng-md-icon icon="photo_camera" class="photo-camera" ng-class="{ 'photo-active': immobilie.imageEleven.url() }" ngf-select="uploadImageEleven($file, $invalidFile)"
+            ngf-max-size="2MB" ngf-pattern="'image/*'" accept="image/*">
+            <md-tooltip>
+              Bild hinzufügen
+            </md-tooltip>
+          </ng-md-icon>
+          <md-progress-circular class="md-primary" md-diameter="30" ng-if="isImageElevenUploading">
+          </md-progress-circular>
+        </div>
+
+        <div layout="row" layout-align="start center">
+          <md-input-container md-no-float>
+            <label>Bild 12 hochladen</label>
+            <input type="text" ng-model="imageTwelveFilename" disabled>
+          </md-input-container>
+          <ng-md-icon icon="photo_camera" class="photo-camera" ng-class="{ 'photo-active': immobilie.imageTwelve.url() }" ngf-select="uploadImageTwelve($file, $invalidFile)"
+            ngf-max-size="2MB" ngf-pattern="'image/*'" accept="image/*">
+            <md-tooltip>
+              Bild hinzufügen
+            </md-tooltip>
+          </ng-md-icon>
+          <md-progress-circular class="md-primary" md-diameter="30" ng-if="isImageTwelveUploading">
+          </md-progress-circular>
+        </div>
+
+        <div layout="row" layout-align="start center">
+          <md-input-container md-no-float>
+            <label>Bild 13 hochladen</label>
+            <input type="text" ng-model="imageThirteenFilename" disabled>
+          </md-input-container>
+          <ng-md-icon icon="photo_camera" class="photo-camera" ng-class="{ 'photo-active': immobilie.imageThirteen.url() }" ngf-select="uploadImageThirteen($file, $invalidFile)"
+            ngf-max-size="2MB" ngf-pattern="'image/*'" accept="image/*">
+            <md-tooltip>
+              Bild hinzufügen
+            </md-tooltip>
+          </ng-md-icon>
+          <md-progress-circular class="md-primary" md-diameter="30" ng-if="isImageThirteenUploading">
+          </md-progress-circular>
+        </div>
+
+        <div layout="row" layout-align="start center">
+          <md-input-container md-no-float>
+            <label>Bild 14 hochladen</label>
+            <input type="text" ng-model="imageFourteenFilename" disabled>
+          </md-input-container>
+          <ng-md-icon icon="photo_camera" class="photo-camera" ng-class="{ 'photo-active': immobilie.imageFourteen.url() }" ngf-select="uploadImageFourteen($file, $invalidFile)"
+            ngf-max-size="2MB" ngf-pattern="'image/*'" accept="image/*">
+            <md-tooltip>
+              Bild hinzufügen
+            </md-tooltip>
+          </ng-md-icon>
+          <md-progress-circular class="md-primary" md-diameter="30" ng-if="isImageFourteenUploading">
+          </md-progress-circular>
+        </div>
+
+        <div layout="row" layout-align="start center">
+          <md-input-container md-no-float>
+            <label>Bild 15 hochladen</label>
+            <input type="text" ng-model="imageFifteenFilename" disabled>
+          </md-input-container>
+          <ng-md-icon icon="photo_camera" class="photo-camera" ng-class="{ 'photo-active': immobilie.imageFifteen.url() }" ngf-select="uploadImageFifteen($file, $invalidFile)"
+            ngf-max-size="2MB" ngf-pattern="'image/*'" accept="image/*">
+            <md-tooltip>
+              Bild hinzufügen
+            </md-tooltip>
+          </ng-md-icon>
+          <md-progress-circular class="md-primary" md-diameter="30" ng-if="isImageFifteenUploading">
+          </md-progress-circular>
+        </div>
+
+        <div layout="row" layout-align="start center">
+          <md-input-container md-no-float>
+            <label>Bild 16 hochladen</label>
+            <input type="text" ng-model="imageSixteenFilename" disabled>
+          </md-input-container>
+          <ng-md-icon icon="photo_camera" class="photo-camera" ng-class="{ 'photo-active': immobilie.imageSixteen.url() }" ngf-select="uploadImageSixteen($file, $invalidFile)"
+            ngf-max-size="2MB" ngf-pattern="'image/*'" accept="image/*">
+            <md-tooltip>
+              Bild hinzufügen
+            </md-tooltip>
+          </ng-md-icon>
+          <md-progress-circular class="md-primary" md-diameter="30" ng-if="isImageSixteenUploading">
+          </md-progress-circular>
+        </div>
+
+      </md-content>
+    </md-dialog-content>
+    <md-dialog-actions layout="row">
+      <span flex></span>
+      <md-button class="md-raised" md-raised md-primary ng-click="cancel()">
+        Zurück
+      </md-button>
+      <md-button type="submit" class="md-raised md-primary" ng-click="onSaveImmobilie(form.$valid)" ng-disabled="isSavingImmobilie"
+        ng-show="isCreating">
+        {{ !isSavingImmobilie ? 'Speichern' : 'Speichere...' }}
+      </md-button>
+      <md-button type="submit" class="md-raised md-primary" ng-click="onUpdateImmobilie(form.$valid)" ng-disabled="isSavingImmobilie"
+        ng-show="!isCreating">
+        {{ !isSavingImmobilie ? 'Aktualisieren' : 'Aktualisiere...' }}
+      </md-button>
+    </md-dialog-actions>
+  </form>
+</md-dialog>

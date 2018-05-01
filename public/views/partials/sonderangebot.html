@@ -1,0 +1,199 @@
+<md-dialog flex="100" flex-gt-xs="40" aria-label="Sonderangebot Dialog">
+  <form name="form" role="form" novalidate>
+    <md-toolbar>
+      <div class="md-toolbar-tools">
+        <h2 ng-show="isCreating">Neuer Eintrag</h2>
+        <h2 ng-show="!isCreating">Bearbeite {{::sonderangebot.title }}</h2>
+        <span flex></span>
+        <ng-md-icon icon="close" class="icon-close" ng-click="cancel()"
+          aria-label="Close dialog"></ng-md-icon>
+      </div>
+    </md-toolbar>
+    <md-dialog-content>
+      <md-content layout="column" layout-padding>	  
+		<md-input-container class="md-block">
+          <label>Kategorie</label>
+			 <md-select name="scategory" required ng-model="sonderangebot.scategory"
+            ng-model-options="{ trackBy: '$value.id' }">
+            <md-option ng-value="scategory"
+              ng-repeat="scategory in scategories track by scategory.id">
+              {{ scategory.title }}
+            </md-option>
+          </md-select>	  		  
+          <div ng-messages="form.scategory.$error" ng-show="form.$submitted">
+            <div ng-message="required">Kategorie erforderlich</div>
+          </div>
+        </md-input-container>
+		
+        <md-input-container class="md-block">
+          <label>Titel</label>
+          <input type="text" required name="title" ng-model="sonderangebot.title">
+          <div ng-messages="form.title.$error" ng-show="form.$submitted">
+            <div ng-message="required">Titel erforderlich</div>
+          </div>
+        </md-input-container>
+
+        <md-input-container class="md-block">
+          <label>Beschreibung</label>
+          <textarea name="description"
+            ng-maxlength="600" ng-model="sonderangebot.description"
+            columns="2" md-maxlength="600">
+          </textarea>
+          <div ng-messages="form.description.$error" ng-show="form.$submitted">
+            <div ng-message="required">Beschreibung erforderlich</div>
+            <div ng-message="maxlength">Beschreibung zu gro�</div>
+          </div>
+        </md-input-container>
+
+        <md-input-container class="md-block">
+          <label>Telefon</label>
+          <input type="text" name="phone" ng-model="sonderangebot.phone">
+        </md-input-container>
+
+        <md-input-container class="md-block">
+          <label>Webseite</label>
+          <input type="text" name="website" ng-model="sonderangebot.website">
+        </md-input-container>
+		
+		 <md-input-container class="md-block">
+          <label>Beginn</label>
+          <input type="text" name="sbeginn" ng-model="sonderangebot.sbeginn">
+        </md-input-container>
+		
+		 <md-input-container class="md-block">
+          <label>Ende</label>
+          <input type="text" name="sende" ng-model="sonderangebot.sende">
+        </md-input-container>
+
+        <md-input-container class="md-block">
+          <label>Preis</label>
+          <input type="number" name="price" ng-model="sonderangebot.price">
+        </md-input-container>
+		
+        <md-input-container class="md-block">
+          <label>Adresse</label>
+          <input type="text" name="address" ng-model="sonderangebot.address"
+            ng-model-options="{ debounce: 2000 }" ng-change="onAddressChanged()">
+        </md-input-container>
+
+        <md-input-container>
+          <ng-map class="map" scrollwheel="false"
+            map-type-control="false"
+            street-view-control="false">
+            <marker draggable="true" on-dragend="onMarkerDragEnd()"></marker>
+          </ng-map>
+        </md-input-container>
+
+        <div layout="row" layout-align="start center">
+          <md-input-container>
+            <label>Breitengrad</label>
+            <input type="number" name="latitude"
+              ng-change="onInputLoicationChanged()"
+              ng-model-options="{debounce:1000}"
+              ng-model="input.latitude">
+          </md-input-container>
+
+          <md-input-container>
+            <label>Längengrad</label>
+            <input type="number" name="longitude"
+              ng-change="onInputLoicationChanged()"
+              ng-model-options="{debounce:1000}"
+              ng-model="input.longitude">
+          </md-input-container>
+        </div>
+
+		<md-input-container class="md-block">
+          <label>Angebot Hervorheben</label>
+          <input id="offerColorInput" type="checkbox" ng-model="sonderangebot.check" ng-value="sonderangebot.check"></input>		 
+        </md-input-container>
+		
+        <div layout="row" layout-align="start center">
+          <md-input-container md-no-float>
+            <label>Bild 1 hochladen</label>
+            <input type="text" ng-model="imageOneFilename" disabled>
+          </md-input-container>
+          <ng-md-icon icon="photo_camera" class="photo-camera"
+            ng-class="{ 'photo-active': sonderangebot.image.url() }"
+            ngf-select="uploadImageOne($file, $invalidFile)" ngf-max-size="2MB"
+            ngf-pattern="'image/*'" accept="image/*">
+            <md-tooltip>
+             Bild hinzufügen
+            </md-tooltip>
+          </ng-md-icon>
+          <md-progress-circular class="md-primary" md-diameter="30"
+            ng-if="isImageOneUploading">
+          </md-progress-circular>
+        </div>
+        <div layout="row" layout-align="start center">
+          <md-input-container md-no-float>
+            <label>Bild 2 hochladen</label>
+            <input type="text" ng-model="imageTwoFilename" disabled>
+          </md-input-container>
+          <ng-md-icon icon="photo_camera" class="photo-camera"
+            ng-class="{ 'photo-active': sonderangebot.imageTwo.url() }"
+            ngf-select="uploadImageTwo($file, $invalidFile)" ngf-max-size="2MB"
+            ngf-pattern="'image/*'" accept="image/*">
+            <md-tooltip>
+             Bild hinzufügen
+            </md-tooltip>
+          </ng-md-icon>
+          <md-progress-circular class="md-primary" md-diameter="30"
+            ng-if="isImageTwoUploading">
+          </md-progress-circular>
+        </div>
+        <div layout="row" layout-align="start center">
+          <md-input-container md-no-float>
+            <label>Bild 3 hochladen</label>
+            <input type="text" ng-model="imageThreeFilename" disabled>
+          </md-input-container>
+          <ng-md-icon icon="photo_camera" class="photo-camera"
+            ng-class="{ 'photo-active': sonderangebot.imageThree.url() }"
+            ngf-select="uploadImageThree($file, $invalidFile)" ngf-max-size="2MB"
+            ngf-pattern="'image/*'" accept="image/*">
+            <md-tooltip>
+             Bild hinzufügen
+            </md-tooltip>
+          </ng-md-icon>
+          <md-progress-circular class="md-primary" md-diameter="30"
+            ng-if="isImageThreeUploading">
+          </md-progress-circular>
+        </div>
+        <div layout="row" layout-align="start center">
+          <md-input-container md-no-float>
+            <label>Bild 4 hochladen</label>
+            <input type="text" ng-model="imageFourFilename" disabled>
+          </md-input-container>
+          <ng-md-icon icon="photo_camera" class="photo-camera"
+            ng-class="{ 'photo-active': sonderangebot.imageFour.url() }"
+            ngf-select="uploadImageFour($file, $invalidFile)" ngf-max-size="2MB"
+            ngf-pattern="'image/*'" accept="image/*">
+            <md-tooltip>
+             Bild hinzufügen
+            </md-tooltip>
+          </ng-md-icon>
+          <md-progress-circular class="md-primary" md-diameter="30"
+            ng-if="isImageFourUploading">
+          </md-progress-circular>
+        </div
+		
+		
+      </md-content>
+    </md-dialog-content>
+    <md-dialog-actions layout="row">
+      <span flex></span>
+      <md-button class="md-raised" md-raised md-primary ng-click="cancel()">
+       Zurück
+      </md-button>
+      <md-button type="submit" class="md-raised md-primary" ng-click="onSaveSonderangebot(form.$valid)"
+        ng-disabled="isSavingSonderangebot"
+        ng-show="isCreating">
+        {{ !isSavingSonderangebot ? 'Speichern' : 'Speichere...' }}
+      </md-button>
+      <md-button type="submit" class="md-raised md-primary" ng-click="onUpdateSonderangebot(form.$valid)"
+        ng-disabled="isSavingSonderangebot"
+        ng-show="!isCreating">
+        {{ !isSavingSonderangebot ? 'Aktualisieren' : 'Aktualisiere...' }}
+      </md-button>
+    </md-dialog-actions>
+  </form>
+</md-dialog>
